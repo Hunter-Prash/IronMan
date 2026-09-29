@@ -1,3 +1,9 @@
+--The Inventory Subsystem: Materials Inventory (tracking raw resources in stock).--
+
+-- The Manufacturing Subsystem: Suits Suit_Component Components (building armor out of physical components like Repulsors, Arc Reactors, Thrusters).--
+
+
+
 -- 1. Materials
 CREATE TABLE IF NOT EXISTS materials (
     id UUID PRIMARY KEY,
@@ -22,19 +28,6 @@ CREATE TABLE IF NOT EXISTS components (
      name VARCHAR(100) NOT NULL UNIQUE,
     category VARCHAR(50) NOT NULL
     );
-
-
--- 4. Component Materials (Join Table with Payload: how much material each component consumes)
-CREATE TABLE IF NOT EXISTS component_materials (
-    id UUID PRIMARY KEY,
-    component_id UUID NOT NULL,
-    material_id UUID NOT NULL,
-   amount_required DOUBLE PRECISION NOT NULL,
-    CONSTRAINT fk_cm_component FOREIGN KEY (component_id) REFERENCES components(id) ON DELETE CASCADE,
-    CONSTRAINT fk_cm_material FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE RESTRICT,
-    CONSTRAINT uq_component_material UNIQUE (component_id, material_id)
-    );
-
 
 -- 5. Suits (The armor models)
 CREATE TABLE IF NOT EXISTS suits (
