@@ -1,0 +1,51 @@
+. MaterialService (Catalog Management)
+Focuses purely on defining what materials exist in the Stark database.
+
+registerMaterial(name, unit)
+
+Validates input (ensures name and unit are non-empty).
+
+Checks for duplicate material names to prevent database unique-constraint crashes.
+
+Saves and returns the created Material.
+
+getMaterialById(UUID materialId)
+
+Retrieves the material metadata.
+
+Throws a ResourceNotFoundException if the ID does not exist.
+
+getAllMaterials()
+
+Fetches the complete catalog of registered materials.
+
+(Optionally a deleteMaterial(UUID materialId) if you want to test the database ON DELETE RESTRICT constraint you defined earlier).
+----------------------------------------------------------------------
+2. InventoryService (Stock Operations & Concurrency)
+Focuses on numerical stock levels and transactional integrity.
+
+initializeStock(Material material)
+
+Creates the linked Inventory record with stockQuantity = 0.0 when a material is first introduced.
+
+addStock(UUID materialId, double amount)
+
+Validates amount > 0.
+
+Fetches the inventory record for materialId.
+
+Increments stockQuantity, updates lastUpdated, and saves.
+
+deductStock(UUID materialId, double amount)
+
+Validates amount > 0.
+
+Fetches the inventory record.
+
+Checks if currentStock >= amount. If not, aborts and throws InsufficientStockException.
+
+Decrements stockQuantity, updates lastUpdated, and saves.
+
+getStockLevel(UUID materialId)
+
+Returns the current quantity available for a specific material.
