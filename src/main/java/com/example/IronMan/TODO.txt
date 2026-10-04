@@ -1,18 +1,65 @@
-Step 1 Deliverables for ComponentService
-To begin, you will need:
+Interviewers at top product companies don't care if you've built twenty basic APIs that just save JSON to Postgres. They care if you can explain:
 
-ComponentRequest (e.g., String name, String category)
+The trade-offs you made (e.g., Why did you choose JOIN FETCH over multiple queries? Why did you pick readOnly = true on transactional reads?).
 
-ComponentResponse (e.g., UUID id, String name, String category)
+Failure modes (e.g., What happens if the inventory deduction fails mid-assembly? How do you prevent race conditions when two users restock the same material concurrently?).
 
-ComponentRepo (with basic queries such as finding by name)
+Internal mechanics (e.g., How does the First-Level Cache work? How do proxies interact with Spring's AOP interceptors?).
 
-ComponentService methods:
-
-createComponent(ComponentRequest req)
-
-getComponentById(UUID id)
-
-getAllComponents()
 
 -------------------------------------------------------------------------
+
+1. Serverless AWS Migration (SAM & Lambda)
+Instead of running Spring Boot 24/7 on an EC2 instance, you will package and run it as an on-demand, serverless backend.
+
+AWS Serverless Java Container:
+
+You will add the aws-serverless-java-container-springboot3 dependency. This lets your entire Spring Boot app run inside an AWS Lambda function without rewriting your controllers or services.
+
+Infrastructure as Code (template.yaml):
+
+You will use AWS SAM (Serverless Application Model) to declare your cloud infrastructure in a YAML template:
+
+The Lambda Function runtime (Java 17/21), memory limits, and timeouts.
+
+An API Gateway trigger (HttpApi or RestApi) that routes incoming HTTP requests directly to your Lambda handler.
+
+Environment variables to connect your Lambda to your database.
+
+Database & VPC Networking:
+
+For production, you will connect the Lambda function to an AWS RDS PostgreSQL instance inside a private VPC with appropriate subnets and security group rules.
+
+2. CI/CD Pipeline (GitHub Actions)
+CI/CD stands for Continuous Integration & Continuous Deployment:
+
+Continuous Integration (CI): Every time you git push, a remote server automatically clones your code, compiles it with Maven/Gradle, and runs all your unit/integration tests to ensure nothing is broken.
+
+Continuous Deployment (CD): Once the build and tests pass, that remote server automatically runs your AWS deployment commands (sam build and sam deploy) to update your live Lambda functions without manual steps.
+
+How You Will Use It Here:
+You will create a .github/workflows/deploy.yml file in your repository.
+
+Whenever you push to main:
+
+GitHub Runner starts up (an Ubuntu virtual machine hosted by GitHub).
+
+Java & Maven Setup: Checks out your repository, sets up Java, and executes mvn clean test to verify your service methods.
+
+AWS Authentication: Connects securely to your AWS account using IAM roles.
+
+SAM Build & Deploy: Executes:
+
+Bash
+sam build
+sam deploy --no-confirm-changeset
+Output: Returns a live API Gateway URL in your GitHub console.
+
+Project Execution Order
+Domain Logic: Finish ComponentService, SuitService, and the transactional assembleSuit() logic.
+
+REST Layer & Tests: Attach Controllers and write tests to guarantee business logic works.
+
+Serverless Packaging: Add the AWS Serverless container adapter and configure template.yaml.
+
+CI/CD Automation: Set up GitHub Actions to test and deploy on every git commit.

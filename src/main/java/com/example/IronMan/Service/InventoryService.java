@@ -49,7 +49,7 @@ public class InventoryService {
             throw new IllegalArgumentException("Deduction amount must be greater than zero");
         }
 
-        Inventory savedInventory = inventoryRepo.findByMaterialId(matId)
+        Inventory savedInventory = inventoryRepo.findByMaterialIdForUpdate(matId)
                 .orElseThrow(() -> new RuntimeException("Material not found in inventory"));
 
         if (savedInventory.getStockQuantity() < deductionAmount) {

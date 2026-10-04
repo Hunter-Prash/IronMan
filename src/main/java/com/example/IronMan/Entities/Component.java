@@ -1,10 +1,7 @@
 package com.example.IronMan.Entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import java.util.ArrayList;
@@ -17,6 +14,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Component {
 
     @Id
