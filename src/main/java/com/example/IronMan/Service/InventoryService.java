@@ -4,25 +4,34 @@ import com.example.IronMan.DTOS.MaterialRequest;
 import com.example.IronMan.DTOS.MaterialResponse;
 import com.example.IronMan.Entities.Inventory;
 import com.example.IronMan.Entities.Material;
+import com.example.IronMan.Helpers.RetryHelper;
 import com.example.IronMan.Repositories.InventoryRepo;
 import com.example.IronMan.Repositories.MaterialRepo;
 import jakarta.transaction.Transactional;
+import org.hibernate.PessimisticLockException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class InventoryService {
 
     private final MaterialRepo materialRepo;
     private final InventoryRepo inventoryRepo;
+    private final RetryHelper retryHelper;
+    private final InventoryService self; // ← new field
 
-    public InventoryService(MaterialRepo materialRepo,InventoryRepo inventoryRepo){
-        this.materialRepo=materialRepo;
-        this.inventoryRepo=inventoryRepo;
+    public InventoryService(MaterialRepo materialRepo, InventoryRepo inventoryRepo,
+                            RetryHelper retryHelper, @Lazy InventoryService self) {
+        this.materialRepo = materialRepo;
+        this.inventoryRepo = inventoryRepo;
+        this.retryHelper = retryHelper;
+        this.self = self;
     }
 
     @Transactional
@@ -43,8 +52,15 @@ public class InventoryService {
         return new MaterialResponse(savedInventory.getMaterial().getId(), savedInventory.getMaterial().getName(),savedInventory.getMaterial().getUnit(),savedInventory.getStockQuantity());
     }
 
+
+    //the retry orchestrator,
+    public MaterialResponse deductStock(UUID matId, Double deductionAmount) throws InterruptedException{
+        return retryHelper.executeWithRetry(()->self.deductStockTransactional(matId,deductionAmount),3);
+    }
+
+
     @Transactional
-    public MaterialResponse deductStock(UUID matId, Double deductionAmount) {
+    public MaterialResponse deductStockTransactional(UUID matId, Double deductionAmount) {
         if (deductionAmount == null || deductionAmount <= 0) {
             throw new IllegalArgumentException("Deduction amount must be greater than zero");
         }
@@ -68,6 +84,8 @@ public class InventoryService {
                 savedInventory.getStockQuantity()
         );
     }
+
+
 
     @Transactional
     public List<MaterialResponse> getAllInventory(){
