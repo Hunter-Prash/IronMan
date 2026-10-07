@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,4 +15,7 @@ public interface SuitRepo extends JpaRepository<Suit, UUID> {
 
     @Query("SELECT s FROM Suit s WHERE LOWER(s.designation) = LOWER(:designation)")
     Optional<Suit> findByDesignation(@Param("designation") String designation);
+
+    @Query("Select s from Suit s join fetch s.suitComponents")
+    List<Suit> findAllWithComponents();
 }
