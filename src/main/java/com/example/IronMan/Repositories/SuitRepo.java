@@ -18,4 +18,7 @@ public interface SuitRepo extends JpaRepository<Suit, UUID> {
 
     @Query("Select s from Suit s join fetch s.suitComponents")
     List<Suit> findAllWithComponents();
+
+    @Query("Select s from Suit s left join fetch s.suitComponents sc left join fetch sc.component where s.id=:id")
+    Optional<Suit> findByIdWithComponents(@Param("id") UUID id);
 }

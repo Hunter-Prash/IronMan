@@ -28,7 +28,7 @@ public interface InventoryRepo extends JpaRepository<Inventory, UUID>
     Optional<Inventory> findByMaterialId(@Param("mat_id")UUID mat_id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)//emits "SELECT ... FOR UPDATE" in PostgreSQL
-    @Query("Select i from Inventory i where i.material.id=:matId")
+    @Query("Select i from Inventory i where i.material.id=:mat_id")
     Optional<Inventory> findByMaterialIdForUpdate(@Param("mat_id")UUID mat_id);
 
     @Query("Select i from Inventory i Join fetch i.material")
